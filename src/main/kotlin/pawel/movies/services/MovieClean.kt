@@ -2,11 +2,10 @@ package pawel.movies.services
 
 import pawel.movies.model.Movie
 
-class MovieClean(val tokenService: TokenService) {
-    fun clean(movie: Movie) =
+class MovieClean() {
+    fun clean(movie: Movie, tokens: Set<String>) =
         if (movie.edited) movie
         else {
-            val tokens = tokenService.tokens()
             val cleanedTitle = cleanTitle(movie.title)
             val year = extractYear(cleanedTitle)
             val furtherCleanedTitle = cleanedTitle

@@ -7,7 +7,6 @@ import pawel.movies.files.UpdateMovies
 import pawel.movies.files.Vuze_Directory
 import pawel.movies.model.createGson
 import pawel.movies.services.DbTokenService
-import pawel.movies.services.MovieClean
 import pawel.movies.services.MoviesService
 import spark.Filter
 import spark.kotlin.*
@@ -28,9 +27,8 @@ fun main(
     val gson = createGson()
 
     val tokenService = DbTokenService(database)
-    val movieClean = MovieClean(tokenService)
     val updateMovies = UpdateMovies(ScanForMovies(directory), database)
-    val moviesService = MoviesService(database, movieClean)
+    val moviesService = MoviesService(database)
 
     if (!moviesService.hasMovies()) {
         updateMovies.update()
@@ -108,6 +106,7 @@ fun main(
 
     post("scan") {
         updateMovies.update()
+        "{}"
     }
 
     options("/*") {

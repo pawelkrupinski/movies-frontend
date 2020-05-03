@@ -127,3 +127,5 @@ gradle-app.setting
 .idea
 
 # End of https://www.gitignore.io/api/gradle,kotlin,intellij+iml
+
+temp

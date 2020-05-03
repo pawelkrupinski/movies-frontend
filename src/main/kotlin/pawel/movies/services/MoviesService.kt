@@ -5,23 +5,24 @@ import org.litote.kmongo.*
 import org.litote.kmongo.id.WrappedObjectId
 import pawel.movies.model.Movie
 
-class MoviesService(database: MongoDatabase, 
-                    private val movieClean: MovieClean) {
+class MoviesService(database: MongoDatabase) {
     
     private val moviesCollection = database.getCollection<Movie>("movies")
-
+    private val tokenService = DbTokenService(database)
+    private val movieClean = MovieClean()
+    
     fun hasMovies(): Boolean = moviesCollection.find().cursor().hasNext()
 
     fun findDeleted(): List<Movie> = moviesCollection
-        .find(Movie::removed eq true).toList().map(movieClean::clean)
+        .find(Movie::removed eq true).toList().map(clean())
     
     fun findAll(): List<Movie> = moviesCollection
-        .find(Movie::removed eq false).toList().map(movieClean::clean)
+        .find(Movie::removed eq false).toList().map(clean())
     
     fun findById(id: String): Movie? = 
         moviesCollection
             .findOneById(movieId(id))
-            ?.let(movieClean::clean)
+            ?.let(clean())
 
     fun update(id: String,
                title: String,
@@ -54,6 +55,11 @@ class MoviesService(database: MongoDatabase,
             Movie::id `in` ids.map(::movieId),
             set(Movie::removed setTo true)
         )
+    }
+    
+    fun clean(): (Movie) -> Movie {
+        val tokens = tokenService.tokens()
+        return { movie -> movieClean.clean(movie, tokens)}
     }
 }
 

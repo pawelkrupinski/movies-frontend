@@ -18,7 +18,7 @@ interface TokenService {
 class DbTokenService(database: MongoDatabase) : TokenService {
     
     private val collection = database.getCollection<Token>("tokens")
-    private val movieClean = MovieClean(this)
+    private val movieClean = MovieClean()
 
     override fun tokens() = collection.find(Token::disabled eq false).map { it.token }.toSet()
 
@@ -29,7 +29,7 @@ class DbTokenService(database: MongoDatabase) : TokenService {
     }
 
     override fun createTokensForEditing(movie: Movie, newTitle: String) {
-        val cleanTitle = movieClean.clean(movie).title
+        val cleanTitle = movieClean.clean(movie, tokens()).title
         if (cleanTitle.contains(newTitle)) {
             val tokens = cleanTitle
                 .replace(newTitle, "")
