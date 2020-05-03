@@ -5,9 +5,9 @@ import pawel.movies.db.DB
 import pawel.movies.files.ScanForMovies
 import pawel.movies.files.UpdateMovies
 import pawel.movies.files.Vuze_Directory
-import pawel.movies.services.MovieClean
 import pawel.movies.model.createGson
 import pawel.movies.services.DbTokenService
+import pawel.movies.services.MovieClean
 import pawel.movies.services.MoviesService
 import spark.Filter
 import spark.kotlin.*
@@ -21,8 +21,8 @@ fun main(
     directory: String = Vuze_Directory,
     database: MongoDatabase = DB().createProd()
 ): Http {
-    
     port(port)
+
     val http = ignite()
 
     val gson = createGson()
@@ -42,6 +42,12 @@ fun main(
         gson.toJson(movies)
     }
 
+    get("/movies/deleted") {
+        response.type("application/json")
+        val movies = moviesService.findDeleted()
+        gson.toJson(movies)
+    }
+
     get("/movie/:id") {
         response.type("application/json")
         val id = request.params(":id")
@@ -56,6 +62,15 @@ fun main(
         "{}"
     }
     
+    delete("/movies") {
+        response.type("application/json")
+        val body = request.body()
+        val ids = gson.fromJson<List<String>>(body, List::class.java).toList()
+
+        moviesService.delete(ids)
+        "{}"
+    }
+    
     put("/movie") {
         response.type("application/json")
 
@@ -65,6 +80,7 @@ fun main(
         val title = json["title"] as String
         val poster = json["poster"] as String?
         val imdbId = json["imdbId"] as String?
+        val removed = json["removed"] as Boolean?
         val year = yearAsInt(json["year"])
 
         val existingMovie = moviesService.findById(id)!!
@@ -74,7 +90,7 @@ fun main(
             tokenService.createTokensForEditing(existingMovie, title)
         }
 
-        moviesService.update(id, title, year, poster, imdbId)
+        moviesService.update(id, title, year, poster, imdbId, removed)
 
         val result = moviesService.findById(id)
         val jsonResponseBody = gson.toJson(result)

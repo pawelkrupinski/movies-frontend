@@ -4,16 +4,36 @@ import org.hamcrest.CoreMatchers
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
+import org.junit.BeforeClass
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
 abstract class FileTest {
-    val path: Path = Paths.get("")
-    val dirName = System.currentTimeMillis().toString()
-    val testDir = path.toAbsolutePath().toString() + "/" + dirName
+    companion object {
+        val path: Path = Paths.get("")
+        val dirName = System.currentTimeMillis().toString()
+        val testDir = path.toAbsolutePath().toString() + "/" + dirName
 
-    var files: List<String> = emptyList()
+        var files: List<String> = emptyList()
+        
+        internal fun mkDir(dir: String) {
+            val file = File(dir)
+            val existsAlready = file.exists()
+
+            file.mkdir()
+            
+            if (!existsAlready) {
+                files += dir
+            }
+        }
+        
+        @BeforeClass
+        @JvmStatic
+        fun createDirStatic() {
+            mkDir(testDir)
+        }
+    }
 
     @Before
     fun createDir() {
@@ -23,14 +43,7 @@ abstract class FileTest {
     @After
     open fun tearDown() {
         files.reversed().forEach(::delete)
-    }
-
-    internal fun mkDir(dir: String) {
-        Assert.assertThat(
-            File(dir).mkdir(),
-            CoreMatchers.`is`(true)
-        )
-        files += dir
+        files = emptyList()
     }
 
     internal fun createMovieFile() = createMovieFile(System.currentTimeMillis().toString())

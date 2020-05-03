@@ -19,7 +19,8 @@ data class Movie(
     val poster: String? = null,
     val missing: Boolean = false,
     val edited: Boolean = false,
-    val removed: Boolean = false
+    val removed: Boolean = false,
+    val added: Long = 0
 )
 
 data class Token(val token: String, val disabled: Boolean = false)

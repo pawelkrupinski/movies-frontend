@@ -32,7 +32,7 @@ class ScanForMovies(val directory: String = Vuze_Directory) : ScanDirectory {
 
 class UpdateMovies(val scanForMovies: ScanForMovies, 
                    val database: MongoDatabase) {
-    
+
     fun update() {
         val collection = database.getCollection<Movie>("movies")
         val existingMovies = collection.find().toSet()
@@ -41,7 +41,8 @@ class UpdateMovies(val scanForMovies: ScanForMovies,
             .map { path ->
                 Movie(
                     path = path.toString(),
-                    title = path.toFile().nameWithoutExtension
+                    title = path.toFile().nameWithoutExtension,
+                    added = path.toFile().lastModified()
                 )
             }
 
@@ -53,7 +54,8 @@ class UpdateMovies(val scanForMovies: ScanForMovies,
 
         collection.updateMany(
             Movie::path `in` missingFiles,
-            setValue(Movie::missing, true))
+            setValue(Movie::missing, true)
+        )
     }
 }
 
@@ -63,3 +65,4 @@ fun main() {
 
     UpdateMovies(ScanForMovies(), database).update()
 }
+

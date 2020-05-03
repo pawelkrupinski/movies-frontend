@@ -11,6 +11,9 @@ class MoviesService(database: MongoDatabase,
     private val moviesCollection = database.getCollection<Movie>("movies")
 
     fun hasMovies(): Boolean = moviesCollection.find().cursor().hasNext()
+
+    fun findDeleted(): List<Movie> = moviesCollection
+        .find(Movie::removed eq true).toList().map(movieClean::clean)
     
     fun findAll(): List<Movie> = moviesCollection
         .find(Movie::removed eq false).toList().map(movieClean::clean)
@@ -20,29 +23,38 @@ class MoviesService(database: MongoDatabase,
             .findOneById(movieId(id))
             ?.let(movieClean::clean)
 
-    fun update(id: String, 
-               title: String, 
-               year: Int?, 
-               poster: String?, 
-               imdbId: String?) {
+    fun update(id: String,
+               title: String,
+               year: Int?,
+               poster: String?,
+               imdbId: String?,
+               removed: Boolean?
+               ) {
+        
+        val listOfSets = mutableListOf(
+            Movie::title setTo title,
+            Movie::year setTo year,
+            Movie::edited setTo true,
+            Movie::poster setTo poster,
+            Movie::imdbId setTo imdbId)
+
+        removed.let { listOfSets.add(Movie::removed setTo it) }
+        
         moviesCollection.updateOne(
             Movie::id eq movieId(id),
-            set(
-                Movie::title setTo title,
-                Movie::year setTo year,
-                Movie::edited setTo true,
-                Movie::poster setTo poster,
-                Movie::imdbId setTo imdbId
-            )
+                    
+            set(*listOfSets.toTypedArray())
         )
     }
 
-    fun delete(id: String) {
-        moviesCollection.updateOne(
-            Movie::id eq movieId(id),
+    fun delete(id: String) = delete(listOf(id))
+
+    fun delete(ids: Iterable<String>) {
+        moviesCollection.updateMany(
+            Movie::id `in` ids.map(::movieId),
             set(Movie::removed setTo true)
         )
     }
-    
-    private fun movieId(id: String) = WrappedObjectId<Movie>(id)
 }
+
+fun movieId(id: String) = WrappedObjectId<Movie>(id)
