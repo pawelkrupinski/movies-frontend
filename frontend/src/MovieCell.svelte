@@ -96,7 +96,6 @@
         <span>
             <div>{movie.title}</div>
             <div>{movie.year}</div>
-<!--            <div>{movie.path}</div>-->
         </span>
     </span>
     {/if}
