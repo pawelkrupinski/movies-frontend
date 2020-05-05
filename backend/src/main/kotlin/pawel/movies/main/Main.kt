@@ -5,9 +5,11 @@ import pawel.movies.db.DB
 import pawel.movies.files.ScanForMovies
 import pawel.movies.files.UpdateMovies
 import pawel.movies.files.Vuze_Directory
+import pawel.movies.model.Movie
 import pawel.movies.model.createGson
 import pawel.movies.services.DbTokenService
 import pawel.movies.services.MoviesService
+import pawel.movies.services.movieId
 import spark.Filter
 import spark.kotlin.*
 
@@ -49,7 +51,7 @@ fun main(
     get("/movie/:id") {
         response.type("application/json")
         val id = request.params(":id")
-        val movie = moviesService.findById(id)
+        val movie = moviesService.findById(movieId(id))
         gson.toJson(movie)
     }
     
@@ -68,27 +70,34 @@ fun main(
         moviesService.delete(ids)
         "{}"
     }
-    
+
     put("/movie") {
         response.type("application/json")
 
-        val json = gson.fromJson(request.body(), MutableMap::class.java)
+        val movie = gson.fromJson(request.body(), Movie::class.java)!!
 
-        val id = json["id"] as String
-        val title = json["title"] as String
-        val poster = json["poster"] as String?
-        val imdbId = json["imdbId"] as String?
-        val removed = json["removed"] as Boolean?
-        val year = yearAsInt(json["year"])
+        val id = movie.id
 
         val existingMovie = moviesService.findById(id)!!
         val edited = existingMovie.edited
 
         if (!edited) {
-            tokenService.createTokensForEditing(existingMovie, title)
+            tokenService.createTokensForEditing(existingMovie, movie.title)
         }
 
-        moviesService.update(id, title, year, poster, imdbId, removed)
+        moviesService.update(movie)
+
+        val result = moviesService.findById(id)
+        val jsonResponseBody = gson.toJson(result)
+        jsonResponseBody
+    }
+
+    post("/movie") {
+        response.type("application/json")
+
+        val movie = gson.fromJson(request.body(), Movie::class.java)!!
+
+        val id = moviesService.add(movie)
 
         val result = moviesService.findById(id)
         val jsonResponseBody = gson.toJson(result)

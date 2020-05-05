@@ -12,7 +12,7 @@ interface TokenService {
     fun tokens(): Set<String>
     fun addTokens(tokens: List<String>)
     fun createTokensForEditing(movie: Movie, newTitle: String)
-    fun delete(params: String)
+    fun delete(token: String)
 }
 
 class DbTokenService(database: MongoDatabase) : TokenService {

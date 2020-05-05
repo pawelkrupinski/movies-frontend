@@ -36,14 +36,18 @@ class ScanForMoviesTest : FileTest() {
 
     @Test
     fun newFileGetsAddedToTheDatabase() {
-        val file = createMovieFile()
+        val path = createMovieFile()
+        val file = File(path)
 
-        val expectedMovie = Movie(id = "".toId(), path = file, title = File(file).nameWithoutExtension)
-
-        assertThat(scanForMovies.scan(), `is`(listOf(Paths.get(file))))
+        val expectedMovie = Movie(id = "".toId(),
+            path = path,
+            title = file.nameWithoutExtension,
+            added = file.lastModified()
+        )
+        
+        assertThat(scanForMovies.scan(), `is`(listOf(Paths.get(path))))
 
         updateMovies.update()
-
         
         assertThat(collection.find().toSet().map(::clearId), `is`(listOf(expectedMovie)))
     }
@@ -52,9 +56,14 @@ class ScanForMoviesTest : FileTest() {
 
     @Test
     fun doesNotAddTheSameFileTwice() {
-        val file = createMovieFile()
-
-        val expectedMovie = Movie(id = "".toId(), path = file, title = File(file).nameWithoutExtension)
+        val path = createMovieFile()
+        val file = File(path)
+        
+        val expectedMovie = Movie(id = "".toId(), 
+            path = path, 
+            title = file.nameWithoutExtension,
+            added = file.lastModified()
+        )
 
         updateMovies.update()
         updateMovies.update()
@@ -65,11 +74,12 @@ class ScanForMoviesTest : FileTest() {
     @Test
     fun marksFileAsMissing() {
         val path = createMovieFile()
-        
-        val expectedMovie = Movie(
-            id = "".toId(),
+        val file = File(path)
+
+        val expectedMovie = Movie(id = "".toId(),
             path = path,
-            title = File(path).nameWithoutExtension,
+            title = file.nameWithoutExtension,
+            added = file.lastModified(),
             missing = true
         )
 

@@ -27,7 +27,8 @@ class DB {
 
     private fun create(database: MongoDatabase): MongoDatabase {
         val movies = database.getCollection("movies")
-        movies.createIndex(Indexes.ascending("path"), IndexOptions().unique(true))
+        movies.createIndex(Indexes.ascending("path"), IndexOptions().unique(true).sparse(true))
+        movies.createIndex(Indexes.ascending("imdbId"), IndexOptions().unique(true).sparse(true))
 
         val tokens = database.getCollection("tokens")
         tokens.createIndex(Indexes.ascending("token"), IndexOptions().unique(true))
