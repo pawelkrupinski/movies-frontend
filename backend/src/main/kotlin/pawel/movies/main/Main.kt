@@ -128,16 +128,7 @@ fun main(
     })
 
     return http
-}
-
-private fun yearAsInt(yearObj: Any?): Int? =
-    if (yearObj != null) {
-        when (yearObj) {
-            is Double -> yearObj.toInt()
-            is String -> yearObj.toInt()
-            else -> throw RuntimeException("Unsupported type")
-        }
-    } else null                      
+}                     
 
 
 

@@ -1,6 +1,5 @@
 package pawel.movies.files
 
-import pawel.movies.db.DB
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
