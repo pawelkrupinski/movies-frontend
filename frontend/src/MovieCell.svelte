@@ -77,7 +77,9 @@
         <span>
             <div>{movie.title}</div>
             <div><input size="10" bind:value="{movie.year}" on:keypress="{keyPress}"/></div>
-            <div>{movie.path}</div>
+            {#if movie.path}
+                <div>{movie.path}</div>
+            {/if}            
             <button on:click="{stopEditing}">Cancel</button>
             <button on:click="{clear}">Clear</button>
             <div><button on:click="{deleteMovie}">Delete</button></div>
