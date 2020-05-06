@@ -11,20 +11,20 @@ import pawel.movies.model.Movie
 
 class MoviesService(val database: MongoDatabase) {
     
-    private val moviesCollection = database.getCollection<Movie>("movies")
+    private val collection = database.getCollection<Movie>("movies")
     private val tokenService = DbTokenService(database)
     private val movieClean = MovieClean()
     
-    fun hasMovies(): Boolean = moviesCollection.find().cursor().hasNext()
+    fun hasMovies(): Boolean = collection.find().cursor().hasNext()
 
-    fun findDeleted(): List<Movie> = moviesCollection
+    fun findDeleted(): List<Movie> = collection
         .find(Movie::removed eq true).toList().map(clean())
     
-    fun findAll(): List<Movie> = moviesCollection
+    fun findAll(): List<Movie> = collection
         .find(Movie::removed eq false).toList().map(clean())
 
     fun findById(id: Id<Movie>): Movie? = 
-        moviesCollection.findOneById(id)?.let(clean())
+        collection.findOneById(id)?.let(clean())
 
 
     fun add(movie: Movie): Id<Movie> {
@@ -36,7 +36,7 @@ class MoviesService(val database: MongoDatabase) {
     }
 
     private fun insertWithUniqieValuesRemoved(movie: Movie): InsertOneResult {
-        val codecRegistry = moviesCollection.codecRegistry
+        val codecRegistry = collection.codecRegistry
         val documentWrapper = BsonDocumentWrapper.asBsonDocument(movie, codecRegistry)
         if (movie.path == null) {
             documentWrapper.remove("path")
@@ -45,7 +45,7 @@ class MoviesService(val database: MongoDatabase) {
             documentWrapper.remove("imdbId")
         }
         
-        return moviesCollection
+        return collection
             .withDocumentClass<BsonDocument>()
             .insertOne(documentWrapper)
     }
@@ -65,7 +65,7 @@ class MoviesService(val database: MongoDatabase) {
         else movie
 
     fun update(movie: Movie) {
-        moviesCollection.updateOne(
+        collection.updateOne(
             Movie::id eq movie.id,
             set(Movie::title setTo movie.title,
                 Movie::year setTo movie.year,
@@ -80,7 +80,7 @@ class MoviesService(val database: MongoDatabase) {
     fun delete(id: String) = delete(listOf(id))
 
     fun delete(ids: Iterable<String>) {
-        moviesCollection.updateMany(
+        collection.updateMany(
             Movie::id `in` ids.map(::movieId),
             set(Movie::removed setTo true)
         )
@@ -89,6 +89,13 @@ class MoviesService(val database: MongoDatabase) {
     fun clean(): (Movie) -> Movie {
         val tokens = tokenService.tokens()
         return { movie -> movieClean.clean(movie, tokens)}
+    }
+
+    fun markAddedPoster(id: Id<Movie>) {
+        collection.updateOne(
+                Movie::id eq id,
+                Movie::customPoster setTo true
+        )    
     }
 }
 

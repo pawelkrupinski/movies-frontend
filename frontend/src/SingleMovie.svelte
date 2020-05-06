@@ -4,7 +4,7 @@
     export let currentRoute
     
     function oneMovie(movie) {
-      return movie.title == currentRoute.namedParams.title
+      return movie.title == currentRoute.namedParams.title.replace("%20", " ")
     }
 </script>
 

@@ -1,10 +1,18 @@
 <script>
     import Search from './Search.svelte';
-    
+    import UploadPoster from './UploadPoster.svelte';
+
     export let movie;
     export let refreshAll;
     let editing = false
+    let posterUrl;
     $: editValues = editing || !movie.edited
+    
+    $: if (movie.customPoster) {
+      posterUrl = 'http://localhost:8000/poster/' + movie.id
+    } else {
+      posterUrl = movie.poster
+    }
     
     function keyPress(e) {
       if (e.keyCode === 13) {
@@ -37,6 +45,11 @@
         editing = false
     }
     
+    function posterUpdated() {
+        movie.customPoster = true
+        stopEditing()
+    }
+    
     function deleteMovie() {
        fetch('http://localhost:8000/movie/' + movie.id, {
             method: 'delete'
@@ -62,13 +75,21 @@
     
     function clear() {
       movie.edited = false
+      movie.customPoster = false
       movie.imdbId = null
       movie.poster = null
       justUpdate()
     }
 </script>
 
-<span style="display: grid; padding: 10px;">
+<style>
+    img {
+       width: 300px;
+       height: auto;
+    }
+</style>
+
+<span style="display: grid;">
     {#if editValues}
       <span>
         <span>
@@ -79,7 +100,9 @@
             <div><input size="10" bind:value="{movie.year}" on:keypress="{keyPress}"/></div>
             {#if movie.path}
                 <div>{movie.path}</div>
-            {/if}            
+            {/if}   
+            
+            <UploadPoster movieId={movie.id} posterUpdated="{posterUpdated}" />
             <button on:click="{stopEditing}">Cancel</button>
             <button on:click="{clear}">Clear</button>
             <div><button on:click="{deleteMovie}">Delete</button></div>
@@ -91,12 +114,13 @@
                 selectedMovie={selectedMovie} />    
     </div>
     {:else}
-      <span on:click="{startEditing}">
-        <span><div><img src="{movie.poster}" alt=""/></div></span>
-        <span>
+    <span on:click="{startEditing}" class="movie-cell" style="display: grid; padding: 10px;">
+        <div><img src="{posterUrl}" alt=""/></div>
+        <div style="align-self: stretch" />
+        <div style="align-self: end">
             <div>{movie.title}</div>
             <div>{movie.year}</div>
-        </span>
+        </div>
     </span>
     {/if}
     

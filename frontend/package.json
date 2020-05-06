@@ -10,6 +10,7 @@
     "@rollup/plugin-commonjs": "^11.0.0",
     "@rollup/plugin-node-resolve": "^7.0.0",
     "rollup": "^1.20.0",
+    "rollup-plugin-css-only": "^2.0.0",
     "rollup-plugin-livereload": "^1.0.0",
     "rollup-plugin-svelte": "^5.0.3",
     "rollup-plugin-terser": "^5.1.2",
@@ -17,6 +18,10 @@
     "svelte-router-spa": "^5.5.0"
   },
   "dependencies": {
+    "@uppy/core": "^1.10.4",
+    "@uppy/dashboard": "^1.8.5",
+    "@uppy/file-input": "^1.4.11",
+    "@uppy/xhr-upload": "^1.5.10",
     "sirv-cli": "^0.4.4"
   }
 }
