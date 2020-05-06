@@ -16,10 +16,17 @@ data class Movie(
     val poster: String? = null,
     val missing: Boolean = false,
     val edited: Boolean = false,
-    val removed: Boolean = false
+    val removed: Boolean = false,
+    val customPoster: Boolean = false
 )
 
 data class Token(val token: String, val disabled: Boolean = false)
+
+data class Poster(
+        @BsonId val id: Id<Movie> = newId(),
+        val type: String,
+        val content: ByteArray
+)
 
 fun createGson(): Gson {
     val builder = GsonBuilder()
