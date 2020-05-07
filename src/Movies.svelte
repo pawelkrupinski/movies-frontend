@@ -1,12 +1,11 @@
 <script>
-    import Movie from './MovieCell.svelte';
+  import Movie from './MovieCell.svelte';
+  import { MovieService } from './services.svelte';
 
-    const host = "http://localhost:8000/"
-    export const searchEnabled = true 
-    let search = ''
+  const service = new MovieService()
+  export const searchEnabled = true
+  let search = ''
 	let name = ''
-	export let fetchUrl = 'movies'
-	let fullFetchUrl = host + fetchUrl
 	let searchResult = []
 	let originalMovies = []
 	let movies = []
@@ -15,57 +14,52 @@
     export let decorate = theMovies => theMovies
     const sortByTitle = (a, b) => a.title.localeCompare(b.title)
     export let sortFunction = sortByTitle
-    export let moviesUpdated = movies => {} 
+    export let moviesUpdated = movies => {}
 
 	if (movies.length == 0) {
       fetchMovies()
 	}
-	
+
     $: {
       search
       refresh()
     }
-	
+
 	function sort(theMovies) {
       theMovies.sort(sortFunction)
       return theMovies
     }
-    	
+
 	export function fetchMovies() {
-      fetch(fullFetchUrl)
-	    .then(response => response.json())
-        .then(json => {
-          updateMovies(json)
-          moviesUpdated(movies) 
-        }, alert)
+      service.findAll(json => {
+        updateMovies(json)
+        moviesUpdated(movies)
+      })
 	}
-	
+
 	export function deleteAll() {
-      fetch(host + 'movies', {
-            method: 'delete',
-            body: JSON.stringify(movies.map(movie => movie.id))
-          }).then(response => response.json())
-          .then(json => fetchMovies(), alert)
+    const ids = movies.map(movie => movie.id)
+    service.deleteAll(ids, json => fetchMovies())
 	}
-    
+
     function searchFilter(movie) {
       if (!search) {
         return true
       }
       return movie.title.includes(search)
     }
-    
+
     function combinedFilter(movie) {
       return searchFilter(movie) && filterMovies(movie)
     }
-	
+
 	function updateMovies(json) {
 	   originalMovies = json
        let filteredMovies = originalMovies.filter(combinedFilter)
        let decoratedMovies = sort(decorate(filteredMovies))
        movies = decoratedMovies
 	}
-	
+
 	export function refresh() {
 	   updateMovies(originalMovies)
 	}

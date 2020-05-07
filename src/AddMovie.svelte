@@ -1,15 +1,14 @@
 <script>
     import Search from './Search.svelte';
     import { sanitizeYear } from './Data.svelte';
-    
+    import { MovieService } from './services.svelte';
+
+    const service = new MovieService()
+
     function add(movie) {
-      fetch('http://localhost:8000/movie', {
-            method: 'post',
-            body: JSON.stringify(movie)
-          }).then(response => response.json())
-          .then(json => {}, alert)
+      service.add(movie, json => {})
     }
-    
+
     function selectedMovie(selected) {
       const movie = {
         "title": selected.Title,

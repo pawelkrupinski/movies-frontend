@@ -1,22 +1,19 @@
 <script>
+	import { TokenService } from './services.svelte';
+
+	const service = new TokenService()
 	let tokens = [];
-	
+
 	if (tokens.length == 0) {
       fetchTokens()
 	}
-	
+
 	function fetchTokens() {
-      fetch('http://localhost:8000/tokens')
-	    .then(response => response.json())
-        .then(json => tokens = json, alert)
+    service.findAll(json => tokens = json)
 	}
-	
+
 	function deleteToken(token) {
-	  fetch('http://localhost:8000/token/' + token, {       
-	        method: 'delete'
-	      }) 
-	    .then(response => response.json())
-        .then(json => tokens = json, alert)
+    service.delete(token, json => tokens = json)
 	}
 </script>
 
