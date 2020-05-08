@@ -1,7 +1,7 @@
 <script>
-	import { TokenService } from './services.svelte';
+	import { tokenService } from './services/Services.svelte';
 
-	const service = new TokenService()
+	const service = new tokenService()
 	let tokens = [];
 
 	if (tokens.length == 0) {

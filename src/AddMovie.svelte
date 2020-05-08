@@ -1,9 +1,9 @@
 <script>
     import Search from './Search.svelte';
     import { sanitizeYear } from './Data.svelte';
-    import { MovieService } from './services.svelte';
+    import { movieService } from './services/Services.svelte';
 
-    const service = new MovieService()
+    const service = movieService()
 
     function add(movie) {
       service.add(movie, json => {})

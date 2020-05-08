@@ -1,8 +1,8 @@
 <script>
   import Movie from './MovieCell.svelte';
-  import { MovieService } from './services.svelte';
+  import { movieService } from './services/Services.svelte';
 
-  const service = new MovieService()
+  const service = movieService()
   export const searchEnabled = true
   let search = ''
 	let name = ''
@@ -16,14 +16,14 @@
   export let sortFunction = sortByTitle
   export let moviesUpdated = movies => {}
 
-	if (movies.length == 0) {
+  if (movies.length == 0) {
       fetchMovies()
 	}
 
-    $: {
-      search
-      refresh()
-    }
+  $: {
+    search
+    refresh()
+  }
 
 	function sort(theMovies) {
       theMovies.sort(sortFunction)
@@ -42,22 +42,22 @@
     service.deleteAll(ids, json => fetchMovies())
 	}
 
-    function searchFilter(movie) {
-      if (!search) {
-        return true
-      }
-      return movie.title.includes(search)
+  function searchFilter(movie) {
+    if (!search) {
+      return true
     }
+    return movie.title.includes(search)
+  }
 
-    function combinedFilter(movie) {
-      return searchFilter(movie) && filterMovies(movie)
-    }
+  function combinedFilter(movie) {
+    return searchFilter(movie) && filterMovies(movie) && !(movie.removed)
+  }
 
 	function updateMovies(json) {
-	   originalMovies = json
-       let filteredMovies = originalMovies.filter(combinedFilter)
-       let decoratedMovies = sort(decorate(filteredMovies))
-       movies = decoratedMovies
+    originalMovies = json
+    const filteredMovies = originalMovies.filter(combinedFilter)
+    const decoratedMovies = sort(decorate(filteredMovies))
+    movies = decoratedMovies
 	}
 
 	export function refresh() {
@@ -69,7 +69,6 @@
     body {
       background-color: #b2bfb5;
     }
-
 </style>
 
 <input bind:value={search}  placeholder="Search"/>

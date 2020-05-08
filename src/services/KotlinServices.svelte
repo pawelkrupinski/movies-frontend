@@ -1,7 +1,7 @@
 <script context="module">
   const host = "http://localhost:8000"
 
-  export class MovieService {
+  export class KotlinMovieService {
 
     add(movie, callback) {
       fetch(host + '/movie', {
@@ -41,7 +41,7 @@
     }
   }
 
-  export class TokenService {
+  export class KotlinTokenService {
     findAll(callback) {
         fetch(host + '/tokens')
           .then(response => response.json())

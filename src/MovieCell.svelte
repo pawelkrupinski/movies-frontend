@@ -1,9 +1,9 @@
 <script>
     import Search from './Search.svelte';
     import UploadPoster from './UploadPoster.svelte';
-    import { MovieService } from './services.svelte';
+    import { movieService } from './services/Services.svelte';
 
-    const service = new MovieService()
+    const service = movieService()
     export let movie;
     export let refreshAll;
     let editing = false
