@@ -10,11 +10,11 @@
 	let originalMovies = []
 	let movies = []
 
-    export let filterMovies = movie => true
-    export let decorate = theMovies => theMovies
-    const sortByTitle = (a, b) => a.title.localeCompare(b.title)
-    export let sortFunction = sortByTitle
-    export let moviesUpdated = movies => {}
+  export let filterMovies = movie => true
+  export let decorate = theMovies => theMovies
+  const sortByTitle = (a, b) => a.title.localeCompare(b.title)
+  export let sortFunction = sortByTitle
+  export let moviesUpdated = movies => {}
 
 	if (movies.length == 0) {
       fetchMovies()

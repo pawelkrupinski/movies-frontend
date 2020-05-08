@@ -1,23 +1,23 @@
 <script>
-    export let selectedMovie = (movie) => {}
+  export let selectedMovie = (movie) => {}
 	export let name = '';
 	export let year = undefined;
 	export let searchBox = false;
 	export let returnIfOne = false;
 	let searchResults = [];
-	
+
     $: if (name != '') {
       let yearQuery;
         if (year === undefined) {
           yearQuery = ''
         } else {
-          yearQuery = '&y=' + year 
+          yearQuery = '&y=' + year
         }
       fetch('http://www.omdbapi.com/?apikey=6a88d99a&s=' + name + yearQuery)
         .then(response => response.json())
         .then(renderResults, alert)
     }
-    
+
     function renderResults(json) {
       if (json.Search !== undefined) {
         searchResults = json.Search
@@ -26,7 +26,7 @@
         searchResults = []
       }
     }
-    
+
     function checkReturnOne() {
       if (returnIfOne && searchResults.length > 0) {
         const result = searchResults.filter(result => result.Title === name)
@@ -34,8 +34,8 @@
           selectedMovie(result[0])
         }
       }
-    }  
-    
+    }
+
     function onMovieSelected(result) {
       name = ''
       searchResults = []
@@ -44,11 +44,11 @@
 </script>
 
 <style>
-    img { 
+    img {
       width: 100px;
       height: auto;
     }
-    
+
     .resultRow {
       padding: 0.5vw;
     }
