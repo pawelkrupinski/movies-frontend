@@ -1,11 +1,22 @@
 <script context="module">
-import { RestfulMongoMovieService } from './RestfulMongoServices.svelte'
+import { RestfulMongoMovieService, hasMongo } from './RestfulMongoServices.svelte'
 import { LocalStorageMovieService } from './LocalStorageServices.svelte'
-import { KotlinMovieService } from './KotlinServices.svelte'
-import { KotlinTokenService } from './KotlinServices.svelte'
+import { KotlinMovieService, KotlinTokenService } from './KotlinServices.svelte'
+
+import { writable } from 'svelte/store';
+
+const mongo = localStorage.getItem("hasMongo") || false;
+
+hasMongo(mongoPresent => {
+  localStorage.setItem("hasMongo", mongoPresent)
+})
 
 export function movieService() {
-  return new RestfulMongoMovieService()
+  if (mongo) {
+    return new RestfulMongoMovieService()
+  } else {
+    return new LocalStorageMovieService()
+  }
 }
 
 export function tokenService() {

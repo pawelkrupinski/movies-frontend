@@ -2,6 +2,12 @@
   const host = "http://localhost:8080"
   const pageSize = 100
 
+  export function hasMongo(callback) {
+    fetch(host)
+      .then(response => response.json())
+      .then(json => callback(json.includes("movies")))
+  }
+
   export class RestfulMongoMovieService {
     findAll(callback) {
       this.findAllWhere(`{"removed": { "$eq": false}}`, callback)
