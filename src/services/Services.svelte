@@ -5,7 +5,7 @@ import { KotlinMovieService, KotlinTokenService } from './KotlinServices.svelte'
 
 import { writable } from 'svelte/store';
 
-const mongo = localStorage.getItem("hasMongo") || false;
+const mongo = localStorage.getItem("hasMongo") == 'true';
 
 if (localStorage.getItem("hasMongo") == undefined) {
     hasMongo(mongoPresent => {
