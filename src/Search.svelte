@@ -13,7 +13,7 @@
         } else {
           yearQuery = '&y=' + year
         }
-      fetch('http://www.omdbapi.com/?apikey=6a88d99a&s=' + name + yearQuery)
+      fetch('https://www.omdbapi.com/?apikey=6a88d99a&s=' + name + yearQuery)
         .then(response => response.json())
         .then(renderResults, alert)
     }
