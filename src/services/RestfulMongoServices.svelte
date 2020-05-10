@@ -5,7 +5,7 @@
   export function hasMongo(callback) {
     fetch(host)
       .then(response => response.json())
-      .then(json => callback(json.includes("movies")), () => callback(false)
+      .then(json => callback(json.includes("movies")), () => callback(false))
   }
 
   export class RestfulMongoMovieService {

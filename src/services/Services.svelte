@@ -7,9 +7,11 @@ import { writable } from 'svelte/store';
 
 const mongo = localStorage.getItem("hasMongo") || false;
 
-hasMongo(mongoPresent => {
-  localStorage.setItem("hasMongo", mongoPresent)
-})
+if (localStorage.getItem("hasMongo") == undefined) {
+    hasMongo(mongoPresent => {
+      localStorage.setItem("hasMongo", mongoPresent)
+    })
+}
 
 export function movieService() {
   if (mongo) {
