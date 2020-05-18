@@ -9,7 +9,6 @@
 
     function deleteAll() {
       movies.deleteAll()
-      search = ''
     }
 
     function scan() {

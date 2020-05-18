@@ -2,13 +2,27 @@
     import Search from './Search.svelte';
     import UploadPoster from './UploadPoster.svelte';
     import { movieService } from './services/Services.svelte';
+    import EditCell from './EditCell.svelte';
+    import { flip } from 'svelte/animate';
+    import { quintOut } from 'svelte/easing';
+    import { blur, crossfade, draw, fade, fly, scale, slide } from 'svelte/transition';
 
     const service = movieService()
-    export let movie;
-    export let refreshAll;
+    export let movie
+
+    export let selecting = false
+    export let selected = id => {}
+    export let unselected = id => {}
+    let isSelected = false
+
+    $: if (!selecting) {
+      isSelected = false
+    }
+    $: selectedClass = calculateSelectedClass(selecting, isSelected)
     let editing = false
-    let posterUrl;
-    $: editValues = editing || !movie.edited
+    let posterUrl
+    let flipped = false
+    $: editValues = !selecting && (editing || !movie.edited)
 
     $: if (movie.customPoster) {
       posterUrl = 'http://localhost:8000/poster/' + movie.id
@@ -16,64 +30,47 @@
       posterUrl = movie.poster
     }
 
-    function keyPress(e) {
-      if (e.keyCode === 13) {
-        editing = false
-        update()
-      }
+    function clicked() {
+        if (selecting) {
+          if (isSelected) {
+            isSelected = false
+            unselected(movie.id)
+          } else {
+            isSelected = true
+            selected(movie.id)
+          }
+        } else {
+          flipped = true
+        }
+        
     }
 
-    function update() {
-      movie.removed = false
-      justUpdate()
+    function unflip() {
+      flipped = false
     }
 
-    function justUpdate() {
-      service.update(movie, json => {
-        movie = json
-        refreshAll()
+    function finishedEditing() {
+      editing = false
+    }
+
+    function markWatched() {
+      movie.watched = true
+      service.update(movie, () => {
+        unflip()
       })
     }
 
-    function startEditing() {
-        editing = true
+    function markUnwatched() {
+      movie.watched = false
+      service.update(movie, () => {})
     }
 
-    function stopEditing() {
-        editing = false
-    }
-
-    function posterUpdated() {
-        movie.customPoster = true
-        stopEditing()
-    }
-
-    function deleteMovie() {
-      service.delete(movie.id, json => refreshAll())
-    }
-
-    function selectedMovie(selected) {
-      editing = false
-      movie.title = selected.Title
-      movie.year = year(selected)
-      movie.imdbId = selected.imdbID
-      movie.poster = selected.Poster
-      update()
-    }
-
-    function year(selected) {
-      if (movie.year) {
-        return movie.year
+    function calculateSelectedClass(selecting, isSelected) {
+      if (selecting && isSelected) {
+        return "selected"
+      } else {
+        return ""
       }
-      return selected.Year
-    }
-
-    function clear() {
-      movie.edited = false
-      movie.customPoster = false
-      movie.imdbId = null
-      movie.poster = null
-      justUpdate()
     }
 </script>
 
@@ -82,41 +79,42 @@
        width: 300px;
        height: auto;
     }
+    .movie-cell {
+      width: 300px;
+      height: 484px;
+      padding: 10px;
+    }
+
+    .selected {
+      background-color: green;
+    }
 </style>
 
 <span style="display: grid;">
     {#if editValues}
-      <span>
-        <span>
-            <input size="35" bind:value="{movie.title}" on:keypress="{keyPress}"/>
-        </span>
-        <span>
-            <div>{movie.title}</div>
-            <div><input size="10" bind:value="{movie.year}" on:keypress="{keyPress}"/></div>
-            {#if movie.path}
-                <div>{movie.path}</div>
-            {/if}
-
-            <UploadPoster movieId={movie.id} posterUpdated="{posterUpdated}" />
-            <button on:click="{stopEditing}">Cancel</button>
-            <button on:click="{clear}">Clear</button>
-            <div><button on:click="{deleteMovie}">Delete</button></div>
-        </span>
-    </span>
-    <div>
-        <Search bind:name="{movie.title}"
-                bind:year="{movie.year}"
-                selectedMovie={selectedMovie} />
-    </div>
+      <EditCell finishEditing={finishedEditing} movie={movie} />
     {:else}
-    <span on:click="{startEditing}" class="movie-cell" style="display: grid; padding: 10px;">
-        <div><img src="{posterUrl}" alt=""/></div>
-        <div style="align-self: stretch" />
-        <div style="align-self: end">
-            <div>{movie.title}</div>
-            <div>{movie.year}</div>
-        </div>
-    </span>
+        {#if flipped}
+          <div transition:fly class="movie-cell">
+             <div>Title: {movie.title}</div>
+             <div>Year: {movie.year}</div>
+             <button on:click={unflip}>Unflip</button> 
+             {#if movie.watched}
+                <button on:click={markUnwatched}>Mark unwatched</button>
+             {:else}
+                <button on:click={markWatched}>Mark watched</button>
+             {/if}
+          </div>
+        {:else}
+          <div transition:fly on:click="{clicked}" class="movie-cell {selectedClass}" style="display: grid;">
+            <div><img src="{posterUrl}" alt=""/></div>
+            <div style="align-self: stretch" />
+            <div style="align-self: end">
+                <div>{movie.title}</div>
+                <div>{movie.year}</div>
+            </div>
+          </div>
+        {/if}
     {/if}
 
 </span>

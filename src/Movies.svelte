@@ -4,6 +4,8 @@
 
   const service = movieService()
   export const searchEnabled = true
+  let selecting = false
+  let selectedMovies=[]
   let search = ''
 	let name = ''
 	let searchResult = []
@@ -39,7 +41,10 @@
 
 	export function deleteAll() {
     const ids = movies.map(movie => movie.id)
-    service.deleteAll(ids, json => fetchMovies())
+    service.deleteAll(ids, json => {
+      search = ''
+      fetchMovies()
+    })
 	}
 
   function searchFilter(movie) {
@@ -62,7 +67,37 @@
 
 	export function refresh() {
 	   updateMovies(originalMovies)
-	}
+  }
+  
+  function startSelecting() {
+    selecting = true
+    selectedMovies = []
+  }
+
+  function cancelSelecting() {
+    selecting = false
+    selectedMovies = []
+  }
+
+  function selected(id) {
+    selectedMovies.push(id)
+  }
+
+  function unselected(id) {
+    selectedMovies = selectedMovies.filter(e => e != id)
+  }
+
+  async function markWatched() {
+      await Promise.all(
+        movies
+          .filter(movie => selectedMovies.includes(movie.id))
+          .map(movie => {
+            movie.watched = true
+            service.update(movie, () => {})
+          })
+      )
+      cancelSelecting()
+  }
 </script>
 
 <style>
@@ -71,10 +106,16 @@
     }
 </style>
 
-<input bind:value={search}  placeholder="Search"/>
+<input bind:value={search} placeholder="Search" /> 
+{#if !selecting}
+   <button on:click={startSelecting}>Select many</button>
+{:else}
+   <button on:click={cancelSelecting}>Cancel selection</button>
+   <button on:click={markWatched}>Mark watched</button>
+{/if}
 
 <div style="display: flex; flex-wrap: wrap;">
     {#each movies as movie}
-    <Movie movie={movie} refreshAll={fetchMovies} />
+    <Movie movie={movie} bind:selecting={selecting} selected={selected} unselected={unselected}/>
     {/each}
 </div>

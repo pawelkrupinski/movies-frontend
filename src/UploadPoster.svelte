@@ -29,7 +29,6 @@ function startUppy() {
       posterUpdated()
     })
 }
-
 </script>
 
 <div>

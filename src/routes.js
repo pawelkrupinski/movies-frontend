@@ -6,6 +6,7 @@ import UneditedMovies from './UneditedMovies.svelte'
 import SingleMovie from './SingleMovie.svelte'
 import Tokens from './Tokens.svelte'
 import Search from './Search.svelte'
+import UnwatchedMovies from './UnwatchedMovies.svelte'
 
 function userIsAdmin() {
   //check if user is admin and returns true or false
@@ -43,6 +44,10 @@ const routes = [
   {
     name: 'search', 
     component: Search 
+  },
+  {
+    name: 'unwatched', 
+    component: UnwatchedMovies 
   }
 ]
 

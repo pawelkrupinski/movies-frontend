@@ -32,7 +32,7 @@
     }
 
     add(movie, callback) {
-      fetch(host + '/movies', {
+      return fetch(host + '/movies', {
             method: 'post',
             body: JSON.stringify(movie)
           }).then(response => response.json())
@@ -40,7 +40,7 @@
     }
 
     update(movie, callback) {
-      this.deleteDuplicate(movie.imdbId, () => {
+      this.deleteDuplicate(movie, () => {
         movie.edited = true
         fetch(host + '/movies/' + movie.id , {
               method: 'PUT',
@@ -79,6 +79,21 @@
       }).then(response => response.json())
       .then(callback, onError)
     }
+
+    deleteDuplicate(movie, callback) {
+      if (movie.imdbId) {
+        findByImdbId(movie.imdbId, movies => {
+          const otherMovie = movies.find(other => other.id != movie.id)
+          if (otherMovie != undefined) {
+            this.realDelete(otherMovie.id, callback)
+          } else {
+            callback()
+          }
+        })
+      } else {
+        callback()
+      } 
+    }
   }
 
   function deleteAllFilter(ids) {
@@ -107,17 +122,6 @@
     .then(response => response.json())
     .then(addIds)
     .then(callback, onError)
-  }
-
-  function deleteDuplicate(imdbId, callback) {
-    if (imdbId) {
-      findByImdbId(imdbId, movies => {
-        const otherMovie = movies[0]
-        if (otherMovie != undefined) {
-          realDelete(otherMovie.id, callback)
-        }
-      })
-    }
   }
 
   export class RestfulMongoTokenService {
