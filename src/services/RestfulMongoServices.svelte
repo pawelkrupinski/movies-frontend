@@ -32,11 +32,14 @@
     }
 
     add(movie, callback) {
+      movie.removed = false
       return fetch(host + '/movies', {
-            method: 'post',
-            body: JSON.stringify(movie)
-          }).then(response => response.json())
-          .then(callback, onError)
+            method: 'POST',
+            body: JSON.stringify(movie),
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }).then(callback, onError)
     }
 
     update(movie, callback) {

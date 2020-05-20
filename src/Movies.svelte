@@ -10,22 +10,17 @@
 	let name = ''
 	let searchResult = []
 	let originalMovies = []
-	let movies = []
+  let movies = []
+  $: movies = updatedMovies(originalMovies, search)
 
   export let filterMovies = movie => true
   export let decorate = theMovies => theMovies
   const sortByTitle = (a, b) => a.title.localeCompare(b.title)
   export let sortFunction = sortByTitle
-  export let moviesUpdated = movies => {}
 
   if (movies.length == 0) {
       fetchMovies()
 	}
-
-  $: {
-    search
-    refresh()
-  }
 
 	function sort(theMovies) {
       theMovies.sort(sortFunction)
@@ -34,8 +29,7 @@
 
 	export function fetchMovies() {
       service.findAll(json => {
-        updateMovies(json)
-        moviesUpdated(movies)
+        originalMovies = json
       })
 	}
 
@@ -58,15 +52,15 @@
     return searchFilter(movie) && filterMovies(movie) && !(movie.removed)
   }
 
-	function updateMovies(json) {
-    originalMovies = json
+	function updatedMovies(originalMovies) {
     const filteredMovies = originalMovies.filter(combinedFilter)
-    const decoratedMovies = sort(decorate(filteredMovies))
-    movies = decoratedMovies
+    const decoratedMovies = decorate(filteredMovies)
+    const sortedMovies = sort(decoratedMovies)
+    return decoratedMovies  
 	}
 
 	export function refresh() {
-	   updateMovies(originalMovies)
+	   originalMovies = originalMovies
   }
   
   function startSelecting() {
@@ -98,6 +92,18 @@
       )
       cancelSelecting()
   }
+
+  async function markWatchNext() {
+    await Promise.all(
+      movies
+        .filter(movie => selectedMovies.includes(movie.id))
+        .map(movie => {
+          movie.watchNext = true
+          service.update(movie, () => {})
+        })
+    )
+    cancelSelecting()
+  }
 </script>
 
 <style>
@@ -112,6 +118,7 @@
 {:else}
    <button on:click={cancelSelecting}>Cancel selection</button>
    <button on:click={markWatched}>Mark watched</button>
+   <button on:click={markWatchNext}>Mark watch next</button>
 {/if}
 
 <div style="display: flex; flex-wrap: wrap;">

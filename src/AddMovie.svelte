@@ -6,7 +6,7 @@
     const service = movieService()
 
     function add(movie) {
-      service.add(movie, json => {})
+      service.add(movie, () => {})
     }
 
     function selectedMovie(selected) {
