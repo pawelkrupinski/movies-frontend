@@ -51,7 +51,7 @@
               headers: {
                 "Content-Type": "application/json"
               }
-            }).then(callback(movie), onError)
+            }).then(callback, onError)
       })
     }
 
@@ -62,7 +62,7 @@
     }
 
     delete(id , callback) {
-      fetch(host + '/movies/' + id, {
+      return fetch(host + '/movies/' + id, {
            method: 'PATCH',
            body: JSON.stringify({ "$set": { "removed": true } }),
            headers: {
@@ -72,15 +72,7 @@
     }
 
     deleteAll(ids, callback) {
-      const idsFilter = deleteAllFilter(ids)
-      fetch(host + '/movies*?filter=' + idsFilter, {
-        method: 'PATCH',
-        body: JSON.stringify({ "$set": { "removed": true } }),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }).then(response => response.json())
-      .then(callback, onError)
+      return Promise.all(ids.map(id => this.delete(id, () => {}))).then(callback, onError)
     }
 
     deleteDuplicate(movie, callback) {

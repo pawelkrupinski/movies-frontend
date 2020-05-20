@@ -5,7 +5,7 @@
 
     const service = movieService()
     export let movie;
-    export let finishEditing;
+    export let finishEditing = () => {};
     let posterUrl;
 
     $: if (movie.customPoster) {
@@ -22,12 +22,11 @@
 
     function update() {
       movie.removed = false
-      justUpdate()
+      doUpdate()
     }
 
-    function justUpdate() {
-      service.update(movie, json => {
-        movie = json
+    function doUpdate() {
+      service.update(movie, () => {
         finishEditing()
       })
     }
@@ -38,7 +37,7 @@
     }
 
     function deleteMovie() {
-      service.delete(movie.id, json => {})
+      service.delete(movie.id, finishEditing)
     }
 
     function selectedMovie(selected) {
@@ -61,7 +60,7 @@
       movie.customPoster = false
       movie.imdbId = null
       movie.poster = null
-      justUpdate()
+      doUpdate()
     }
 </script>
 

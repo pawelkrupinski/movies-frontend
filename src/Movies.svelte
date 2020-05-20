@@ -23,19 +23,19 @@
 	}
 
 	function sort(theMovies) {
-      theMovies.sort(sortFunction)
-      return theMovies
-    }
+    theMovies.sort(sortFunction)
+    return theMovies
+  }
 
 	export function fetchMovies() {
-      service.findAll(json => {
-        originalMovies = json
-      })
+    service.findAll(json => {
+      originalMovies = json
+    })
 	}
 
 	export function deleteAll() {
     const ids = movies.map(movie => movie.id)
-    service.deleteAll(ids, json => {
+    service.deleteAll(ids, () => {
       search = ''
       fetchMovies()
     })
@@ -56,7 +56,7 @@
     const filteredMovies = originalMovies.filter(combinedFilter)
     const decoratedMovies = decorate(filteredMovies)
     const sortedMovies = sort(decoratedMovies)
-    return decoratedMovies  
+    return sortedMovies  
 	}
 
 	export function refresh() {
@@ -82,15 +82,15 @@
   }
 
   async function markWatched() {
-      await Promise.all(
-        movies
-          .filter(movie => selectedMovies.includes(movie.id))
-          .map(movie => {
-            movie.watched = true
-            service.update(movie, () => {})
-          })
-      )
-      cancelSelecting()
+    await Promise.all(
+      movies
+        .filter(movie => selectedMovies.includes(movie.id))
+        .map(movie => {
+          movie.watched = true
+          service.update(movie, () => {})
+        })
+    )
+    cancelSelecting()
   }
 
   async function markWatchNext() {
@@ -123,6 +123,10 @@
 
 <div style="display: flex; flex-wrap: wrap;">
     {#each movies as movie}
-    <Movie movie={movie} bind:selecting={selecting} selected={selected} unselected={unselected}/>
+    <Movie movie={movie} 
+        bind:selecting={selecting} 
+        selected={selected} 
+        unselected={unselected} 
+        stateChanged={fetchMovies} />
     {/each}
 </div>
